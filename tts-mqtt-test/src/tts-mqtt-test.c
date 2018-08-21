@@ -21,7 +21,7 @@ volatile MQTTClient_deliveryToken deliveredtoken;
 
 #include "log.h"
 
-static void _DBGelivered(void *context, MQTTClient_deliveryToken dt)
+static void _delivered(void *context, MQTTClient_deliveryToken dt)
 {
     DBG("Message with token value %d delivery confirmed\n", dt);
     deliveredtoken = dt;
@@ -44,14 +44,15 @@ static int __msgarrvd(void *context, char *topicName, int topicLen, MQTTClient_m
 
 static void __connlost(void *context, char *cause)
 {
-    DBG("\nConnection lost\n");
+    DBG("Connection lost\n");
     DBG("     cause: %s\n", cause);
 }
 
-static bool service_app_create(void *userDBGata)
+static bool service_app_create(void *user_data)
 {
-	FN_CALL;
-    MQTTClient client;
+	DBG("service_app_create");
+
+	MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     int rc;
 
@@ -62,7 +63,7 @@ static bool service_app_create(void *userDBGata)
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession = 1;
 
-    MQTTClient_setCallbacks(client, NULL, __connlost, __msgarrvd, _DBGelivered);
+    MQTTClient_setCallbacks(client, NULL, __connlost, __msgarrvd, _delivered);
 
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
         DBG("Failed to connect, return code %d\n", rc);
@@ -78,14 +79,15 @@ static bool service_app_create(void *userDBGata)
     return true;
 }
 
-static void service_app_terminate(void *userDBGata)
+static void service_app_terminate(void *user_data)
 {
-	FN_CALL;
+	DBG("service_app_terminate");
 }
 
-static void service_app_control(app_control_h app_control, void *userDBGata)
+static void service_app_control(app_control_h app_control, void *user_data)
 {
-	FN_CALL;
+	DBG("service_app_control");
+
 	if (app_control == NULL) {
 		ERR("app_control is NULL");
 		return;
@@ -94,8 +96,6 @@ static void service_app_control(app_control_h app_control, void *userDBGata)
 
 int main(int argc, char *argv[])
 {
-	FN_CALL;
-
 	char ad[50] = {0,};
 	service_app_lifecycle_callback_s event_callback;
 
