@@ -1,0 +1,6 @@
+.sign/
+res/certificate.pem
+res/privatekey.der
+
+/Debug/
+/SA_Report/
